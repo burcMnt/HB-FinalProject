@@ -1,0 +1,34 @@
+﻿using Application.WebApi.IdentityJwt;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Application.WebApi.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class TokenController : ControllerBase
+    {
+        private readonly IUserService _userService;
+        private readonly IConfiguration _configuration;
+        public TokenController(IUserService userService, IConfiguration configuration)
+        {
+            _userService = userService;
+            _configuration = configuration;
+        }
+
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] UserToken model)
+        {
+            var user = _userService.Authenticate(model.Email, model.Password);
+            if (user == null) return BadRequest();
+
+            var token = JwtGenerator.Generate(user, _configuration["Jwt:Key"], _configuration["Jwt:Issuer"]);
+            return Ok(token);
+        }
+    }
+}

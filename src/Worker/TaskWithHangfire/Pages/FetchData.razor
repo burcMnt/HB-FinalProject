@@ -1,0 +1,120 @@
+﻿@page "/fetchdata"
+
+@using TaskWithHangfire.Data;
+@using TaskWithHangfire.Extensions
+
+@inject IItemListFirstTen itemList
+@inject IItemListFirstTen userList
+@inject IDistributedCache cache
+
+
+
+<h1>Items List</h1>
+
+<p>This application fetching data from database.</p>
+
+<button class="btn btn-primary" @onclick="LoadItemsList">Load Items List and UserItem List</button>
+
+@if (FirstTenitemList == null && FirstTenUseritemList == null && loadLocation=="")
+{
+    <p> Click the button to load the database</p>
+}
+else if (FirstTenitemList is null && FirstTenUseritemList is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="h3 @isCacheData">@loadLocation</div> @* where data come from*@
+
+    <h2>---------------- Top 10 Items --------------------</h2> <br />
+    <div class="">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Item Id</th>
+                    <th>Item Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in FirstTenitemList)
+                {
+                    <tr>
+                        <td>@a._Id</td>
+                        <td>@a.ItemId</td>
+                        <td>@a.ItemQuantity</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <h2>---------------- Top Ten Items(by Users) -----------------</h2><br />
+    <div>
+      <input type="text" bind="@MyInput" /> 
+    </div>
+    <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>User Id</th>
+                    <th>Item Id</th>
+                    <th>Item Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in FirstTenUseritemList)
+                {
+                    <tr>
+                        <td>@a._Id</td>
+                        <td>@a.UserId</td>
+                        <td>@a.ItemId</td>
+                        <td>@a.ItemQuantity</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+
+}
+
+@code {
+
+    private List<ListItem> FirstTenitemList;
+    private List<UserListItem> FirstTenUseritemList;
+    private string loadLocation = "";
+    private string isCacheData = "";
+    protected string MyInput { get; set; }
+
+    private async Task LoadItemsList()
+    {
+        FirstTenitemList = null;
+        FirstTenUseritemList = null;
+        loadLocation = null;
+
+        string recordKey = "ListItems_" + DateTime.Now.ToString("yyyyMMdd_hhmm");
+        FirstTenitemList = await cache.GetRecordAsync<List<ListItem>>(recordKey);
+        FirstTenUseritemList = await cache.GetRecordAsync<List<UserListItem>>(recordKey);
+
+        if (FirstTenitemList is null && FirstTenUseritemList is null)
+        {
+            FirstTenitemList = await itemList.GetAllData();
+            FirstTenUseritemList = await userList.GetUserAllData();
+
+            //database den çekicek
+            loadLocation = $"Loaded from Database at {DateTime.Now}";
+            isCacheData = "";
+            await cache.SetRecordAsync(recordKey, FirstTenitemList);
+            await cache.SetRecordAsync(recordKey, FirstTenUseritemList);
+        }
+        else
+        {
+            loadLocation = $"Loaded from Cache at {DateTime.Now}";
+            isCacheData = "text-danger";
+        }
+
+    }
+}

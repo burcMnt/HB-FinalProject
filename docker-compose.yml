@@ -1,0 +1,33 @@
+version: '3.4'
+
+services:
+  app.webapi:
+    image: ${DOCKER_REGISTRY-}appwebapi
+    build:
+      context: .
+      dockerfile: src/WebApi/App.WebApi/Dockerfile
+  
+  HB_postgre:
+    container_name: my_postgreDb
+    image: postgres
+    ports:
+       - 5432:5432
+    environment:
+       - POSTGRES_PASSWORD=123
+       - PGDATA=/var/lib/postgresql/data/pgdata
+       - POSTGRES_USER=postgres
+       - POSTGRES_DB=HBFinalDb
+    volumes:
+       - /opt/app_data/postgres:/var/lib/postgresql/data/pgdata
+
+
+  Hb_mongo:
+    container_name: my_mongoDb
+    image: mongo
+    restart: always
+    volumes:
+      - /opt/app_data/postgres:/data/db
+    ports:
+      - "27017:27017" 
+    
+      
