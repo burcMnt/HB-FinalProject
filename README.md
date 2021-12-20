@@ -56,8 +56,8 @@ olmak üzere 3 container kaldirilmistir.
 ## Hangfire&Cache
 
 ><img src="https://github.com/Hepsiburada-Backend-Bootcamp/BurcuMantar-Hepsiburada-FinalProject/blob/master/src/Core/App.ApplicationCore/Images/hangfire%26cache.png"/>
-><img src=""/>
-><img src=""/>
+><img src="https://github.com/burcMnt/HB-FinalProject/blob/master/src/Core/App.ApplicationCore/Images/cache1.png"/>
+><img src="https://github.com/burcMnt/HB-FinalProject/blob/master/src/Core/App.ApplicationCore/Images/cache2.png"/>
 
 ## Docker 
 
